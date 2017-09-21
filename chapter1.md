@@ -1,5 +1,7 @@
 # 服务注册-Eureka
 
+本文代码示例: [https://github.com/hand-wanggang/erueka-demo](https://github.com/hand-wanggang/erueka-demo "文中代码实例")
+
 Spring Clound为开发人员提供了快速构建系统的一些工具，包括配置管理、服务发现、断路器、路由、微代理、事件总线、全局锁、决策竞争、分布锁等。eureka是服务的发现和注册中心，微服务架构的项目的所有模块服务都应在eureka中注册。
 
 在spring cloud官网的介绍中eureka有集群工作模式和单机模式两种。单机模式就是只有一个eureka服务；协同模式就是多个eureka服务相互注册，协同工作，如果服务A在eureka-1中注册发现了，那么eureka-2、eureka-3等erueka服务都会感知到服务A。
@@ -107,13 +109,9 @@ eureka:
       defaultZone: http://${eureka.instance.hostname}:8761/eureka/
 ```
 
-2、项目启动时配置不同的环境变量\(spring.profiles.active=server1或者server\)，激活不同的配置文件，将启动eureka-server1和eureka-server2和eureka-client。运行成功后访问http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。
+2、项目启动时配置不同的环境变量\(spring.profiles.active=server1或者server\)，激活不同的配置文件，将启动eureka-server1和eureka-server2和eureka-client。运行成功后访问[http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。](http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。)
 
 可是，eureka-client明明只向端口为8761的eureka-server注册了，为什么eureka-server2会知道呢？这是因为在协同模式下，各eureka-server之间会交流信息，类似于路由器之间交换路由信息。
 
 ![](/assets/import-eureka-1.png)![](/assets/import-eureka-2.png)
-
-
-
-
 
