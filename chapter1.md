@@ -69,31 +69,49 @@ eureka:
 
 至此，erueka注册是发现服务的单机模式已经介绍完了。到这里我隐约感觉到eureka像一个经纪人，但是它不姓宋^.^。
 
-
-
 ##### 三、Eureka的协同工作模式
 
 eureka的协同模式，我们可以再创建几个eureka-server的项目，也可以通过修改配置文件的方式来启动多个服务。下面使用修改配置文件的方式。
 
-1、在项目eureka-server项目下添加两个配置文件
+1、在项目eureka-server项目下添加两个配置文件application-server1.yml和application-server2.yml
 
+application-server1.yml
 
+```
+server:
+  port: 8761                     # 配置服务端口
+spring:
+  application:
+    name: eureka-server-1        # 配置服务名称，这是一个服务的唯一标志
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8762/eureka/
+```
 
+application-server2.yml
 
+```
+server:
+  port: 8762                     # 配置服务端口
+spring:
+  application:
+    name: eureka-server-2        # 配置服务名称，这是一个服务的唯一标志
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
+```
 
+2、项目启动时配置不同的环境变量\(spring.profiles.active=server1或者server\)，激活不同的配置文件，将启动eureka-server1和eureka-server2和eureka-client。运行成功后访问http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。
 
+可是，eureka-client明明只向端口为8761的eureka-server注册了，为什么eureka-server2会知道呢？这是因为在协同模式下，各eureka-server之间会交流信息，类似于路由器之间交换路由信息。
 
-
-
-
-
-
-
-
-
-
-
-
+![](/assets/import-eureka-1.png)![](/assets/import-eureka-2.png)
 
 
 
