@@ -2,6 +2,8 @@
 
 部分内容来自于：[http://blog.csdn.net/forezp/article/details/69788938](http://blog.csdn.net/forezp/article/details/69788938)
 
+本章代码示例：[https://github.com/hand-wanggang/erueka-demo/tree/ribbon-demo](https://github.com/hand-wanggang/erueka-demo/tree/ribbon-demo)
+
 ##### 一、官网文档对Ribbon的介绍
 
 根据spring cloud文档的介绍Ribbon是客户端的负载均衡器。并且提供了大量的http和tcp的行为控制。spring cloud中的FeignClient集成了ribbon。ribbon的核心思想是命名客户端。
@@ -101,16 +103,16 @@ eureka:
 @RequestMapping("/")
 public class RibbonRequestController {
 
-	@Value("${requestUrl}")
-	private String requestUrl;
+    @Value("${requestUrl}")
+    private String requestUrl;
 
-	@Autowired
-	private RestTemplate restTemplate;
+    @Autowired
+    private RestTemplate restTemplate;
 
-	@RequestMapping("/request")
-	public String reques(){
-		return restTemplate.getForObject(requestUrl,String.class);
-	}
+    @RequestMapping("/request")
+    public String reques(){
+        return restTemplate.getForObject(requestUrl,String.class);
+    }
 }
 ```
 
@@ -118,7 +120,7 @@ public class RibbonRequestController {
 
 查看eureka-server页面如下：service-ribbon注册了两个实例![](/assets/import-ribbon-1.png)
 
-6、多次请求地址http://localhost:8092/request 会出现如下内容交替出现的情况。这是因为我们实用restTemplate请求时，使用了ribbon对客户端请求做了负载均衡处理。
+6、多次请求地址[http://localhost:8092/request](http://localhost:8092/request) 会出现如下内容交替出现的情况。这是因为我们实用restTemplate请求时，使用了ribbon对客户端请求做了负载均衡处理。
 
 ![](/assets/import-ribbon-2.png)
 
