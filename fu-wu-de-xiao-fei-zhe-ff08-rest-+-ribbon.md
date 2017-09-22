@@ -94,19 +94,33 @@ eureka:
 
 在程序主类上添加注解@EnableDiscoveryClient，表示允许该服务发现eureka上注册的服务（或者说是可以拉取服务列表）。
 
-4、依次启动eureka-server、service-provide\(两个实例\)、service-customer。
+4、提供接口用于请求，接口内使用restTemplate转发请求，并将结果发回给我们。
+
+```
+@RestController
+@RequestMapping("/")
+public class RibbonRequestController {
+
+	@Value("${requestUrl}")
+	private String requestUrl;
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	@RequestMapping("/request")
+	public String reques(){
+		return restTemplate.getForObject(requestUrl,String.class);
+	}
+}
+```
+
+5、依次启动eureka-server、service-provide\(两个实例\)、service-customer。
 
 查看eureka-server页面如下：service-ribbon注册了两个实例![](/assets/import-ribbon-1.png)
 
+6、多次请求地址http://localhost:8092/request 会出现如下内容交替出现的情况。这是因为我们实用restTemplate请求时，使用了ribbon对客户端请求做了负载均衡处理。
 
+![](/assets/import-ribbon-2.png)
 
-
-
-
-
-
-
-
-
-
+![](/assets/import-ribbon-3.png)
 
