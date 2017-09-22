@@ -109,7 +109,7 @@ eureka:
       defaultZone: http://${eureka.instance.hostname}:8761/eureka/
 ```
 
-2、项目启动时配置不同的环境变量\(spring.profiles.active=server1或者server\)，激活不同的配置文件，将启动eureka-server1和eureka-server2和eureka-client。运行成功后访问[http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。](http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。)
+2、项目启动时配置不同的环境变量\(spring.profiles.active=server1或者server2\)，激活不同的配置文件，将启动eureka-server1和eureka-server2和eureka-client。运行成功后访问[http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。](http://localhost:8761/和http://localhost:8762/发现，两个注册服务中都发现了服务eureka-client。)
 
 可是，eureka-client明明只向端口为8761的eureka-server注册了，为什么eureka-server2会知道呢？这是因为在协同模式下，各eureka-server之间会交流信息，类似于路由器之间交换路由信息。
 
