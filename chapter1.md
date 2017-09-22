@@ -115,3 +115,51 @@ eureka:
 
 ![](/assets/import-eureka-1.png)![](/assets/import-eureka-2.png)
 
+##### 四、Spring Cloud文档上的一些细节
+
+1、因为gradle依赖项目没有像maven一样的依赖管理pom，可以通过添加如下插件来实现
+
+```
+buildscript {
+  dependencies {
+    classpath "io.spring.gradle:dependency-management-plugin:0.4.0.RELEASE"
+  }
+}
+
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+  imports {
+    mavenBom 'org.springframework.cloud:spring-cloud-starter-parent:1.0.0.RELEASE'
+  }
+}
+```
+
+2、eureka在协作模式下，各eureka-server之间要确保至少有一条路线是可达的。
+
+3、在eureka上注册的服务，需要定时的发送存活心跳，来维持其在eureka上的身份。
+
+4、默认情况下，注册到eureka的服务都显示其服务名称，如之前的eureka-client1,就是服务名称，如果要显示其ip地址的话，可以在eureka-server的配置文件中设置eureka.instance.preferIpAddress=true（IP优先）。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
