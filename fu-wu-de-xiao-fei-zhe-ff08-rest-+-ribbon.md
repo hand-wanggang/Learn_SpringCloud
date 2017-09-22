@@ -1,4 +1,4 @@
-# 服务的消费者（rest+roibbon）
+# 服务的消费者（rest+roibbon/feign）
 
 部分内容来自于：[http://blog.csdn.net/forezp/article/details/69788938](http://blog.csdn.net/forezp/article/details/69788938)
 
