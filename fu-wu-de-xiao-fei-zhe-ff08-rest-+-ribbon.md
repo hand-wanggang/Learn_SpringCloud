@@ -78,7 +78,7 @@ public class ServerInfoController {
 2、添加配置文件application.yml
 
 ```
-requestUrl: http://service-provide/request # riboon请求地址，注意此处域名使用的是服务名service-provide
+requestUrl: http://SERVICE-PROVIDE/info # riboon请求地址，注意此处域名使用的是服务名service-provide
 server:
   port: 8092
 spring:
@@ -94,11 +94,9 @@ eureka:
 
 在程序主类上添加注解@EnableDiscoveryClient，表示允许该服务发现eureka上注册的服务（或者说是可以拉取服务列表）。
 
+4、依次启动eureka-server、service-provide\(两个实例\)、service-customer。
 
-
-
-
-
+查看eureka-server页面如下：service-ribbon注册了两个实例![](/assets/import-ribbon-1.png)
 
 
 
