@@ -1,6 +1,8 @@
 # Spring Cloud的分布式配置中心
 
-       分布式配置中心，为微服务的所有服务提供属性配置属性。将配置属性集中管理。配置中心的属性文件可以存放在服务本地也可以存储在git上。配置服务中心同其他服务相同也可以集群化。
+```
+   分布式配置中心，为微服务的所有服务提供属性配置属性。将配置属性集中管理。配置中心的属性文件可以存放在服务本地也可以存储在git上。配置服务中心同其他服务相同也可以集群化。
+```
 
 ##### 一、创建一个配置中心服务 config-server
 
@@ -8,9 +10,9 @@
 
 ```
 dependencies {
-	compile('org.springframework.cloud:spring-cloud-config-server')
-	compile('org.springframework.cloud:spring-cloud-starter-eureka')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile('org.springframework.cloud:spring-cloud-config-server')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 ```
 
@@ -44,6 +46,7 @@ eureka:
 * /{application}/{profile}\[/{label}\]
 
 * /{application}-{profile}.yml
+
 * /{label}/{application}-{profile}.yml
 * /{application}-{profile}.properties
 * /{label}/{application}-{profile}.properties
@@ -54,9 +57,9 @@ eureka:
 
 ```
 dependencies {
-	compile('org.springframework.cloud:spring-cloud-starter-config')
-	compile('org.springframework.cloud:spring-cloud-starter-eureka')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile('org.springframework.cloud:spring-cloud-starter-config')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 ```
 
@@ -91,13 +94,13 @@ eureka:
 @RequestMapping("/")
 public class GetConfigPropertiesController {
 
-	@Value("${foo.version}")
-	private String version;
+    @Value("${foo.version}")
+    private String version;
 
-	@RequestMapping("/version")
-	public String version(){
-		return version;
-	}
+    @RequestMapping("/version")
+    public String version(){
+        return version;
+    }
 }
 ```
 
@@ -107,9 +110,11 @@ public class GetConfigPropertiesController {
 
 ##### 三、配置服务中心的高可用
 
-同之前服务相同，spring clod的中的服务似乎都是可以高可用的。下面我们来配置一个高可用的服务中心。因为上面的config-client的例子中，我们没有明确指定配置中心的地址，而是使用配置服务中心的注册名，这位下面的例子做了铺垫。现在我们只需要对confg-server稍作修改即可。
+同之前服务相同，spring clod的中的服务似乎都是可以高可用的。下面我们来配置一个高可用的服务中心。因为上面的config-client的例子中，我们没有明确指定配置中心的地址，而是使用配置服务中心的注册名，这为下面的例子做了铺垫。现在我们只需要对confg-server稍作修改即可。
 
+1、以为配置高可用，至少需要config-server的两个实例，所以需要修改config-server的配置文件。
 
+拷贝application.yml文件内容到application-server1.yml文件和application-server2.yml中，并修改application-server2.yml中的server.port = 8889
 
-
+2、启动config-server时通过修改环境变量启动两个服务实例。
 
