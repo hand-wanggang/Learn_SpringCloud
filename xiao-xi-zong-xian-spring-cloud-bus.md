@@ -23,7 +23,5 @@ dependencies {
 
 4、上面的那种方式会刷新所有服务，可以通过destination参数指定刷新的服务。
 
-如http://localhost:8889/bus/refresh?destination=customers:9000
-
-
+如[http://localhost:8889/bus/refresh?destination=customers:9000](http://localhost:8889/bus/refresh?destination=customers:9000),会刷新服务名为customer，端口为9000的实例。
 
