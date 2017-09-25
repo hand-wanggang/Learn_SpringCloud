@@ -6,4 +6,5 @@
 * [断路器 Hystrix](duan-lu-qihystrix.md)
 * [路由网关 ZUUL](lu-you-wang-guan-zuul.md)
 * [分布式配置中心](fen-bu-shi-pei-zhi-zhong-xin.md)
+* [消息总线 Spring Cloud Bus](xiao-xi-zong-xian-spring-cloud-bus.md)
 
