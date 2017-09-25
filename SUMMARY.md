@@ -2,5 +2,6 @@
 
 * [简介](README.md)
 * [服务注册-Eureka](chapter1.md)
-* [服务的消费者（rest+ribbon）](fu-wu-de-xiao-fei-zhe-ff08-rest-+-ribbon.md)
+* [服务的消费者（rest+ribbon/feign）](fu-wu-de-xiao-fei-zhe-ff08-rest-+-ribbon.md)
+* [断路器 Hystrix](duan-lu-qihystrix.md)
 

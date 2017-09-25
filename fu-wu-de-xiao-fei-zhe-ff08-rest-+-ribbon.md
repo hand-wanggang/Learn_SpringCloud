@@ -120,9 +120,61 @@ public class RibbonRequestController {
 
 查看eureka-server页面如下：service-ribbon注册了两个实例![](/assets/import-ribbon-1.png)
 
-6、多次请求地址[http://localhost:8092/request](http://localhost:8092/request) 会出现如下内容交替出现的情况。这是因为我们实用restTemplate请求时，使用了ribbon对客户端请求做了负载均衡处理。
+6、多次请求地址[http://localhost:8092/request](http://localhost:8092/request) 会出现如下内容交替出现的情况。这是因为我们实用restTemplate请求时，使用了ribbon对客户端请求做了负载均衡处理，请求是由两台不同的服务器处理的。
 
 ![](/assets/import-ribbon-2.png)
 
 ![](/assets/import-ribbon-3.png)
+
+##### 四、使用feign来调用服务
+
+因为feign已经封装的非常易用，所以我们在之前的模块service-customer添加一些代码和依赖即可。
+
+1、在service-customer的build.gradle文件中添加依赖 org.springframework.cloud:spring-cloud-starter-feign:1.3.4.RELEASE，如下所示：
+
+```
+dependencies {
+	compile(['org.springframework.boot:spring-boot-starter-web'],
+			['org.springframework.cloud:spring-cloud-starter-eureka:1.3.4.RELEASE'],
+			['org.springframework.cloud:spring-cloud-starter-ribbon:1.3.4.RELEASE'],
+			['org.springframework.cloud:spring-cloud-starter-feign:1.3.4.RELEASE']
+	)
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+```
+
+2、在项目的入口主类上添加注解@EnableFeignClients，开启feign调用。
+
+3、编写接口，并用@FeignClient标注，表示这是一个feign调用。如果需要处理调用出现异常或超时的情况，可以实现该接口，并在方法中返回特定的返回值。
+
+```java
+@FeignClient(name = "service-provide",fallback = RequestServerInfoClientImpl.class)
+public interface RequestServerInfoClient {
+
+	@RequestMapping("/info")
+	public String info();
+}
+
+```
+
+4、在程序中使用feignClient请求服务，其中的serverInfoClient，就是注入的一个feignClient的实例。
+
+```java
+	@RequestMapping("/feign")
+	public String feign(){
+		return serverInfoClient.info();
+	}
+```
+
+5、多调用接口，发现feign默认实现了负载均衡
+
+![](/assets/import-feign-1.png)
+
+![](/assets/import-feign-2.png)
+
+6、比较三和四中，两种调用服务的方法：相比之下feign更加易用，对错误的处理也更加便捷并且feign默认实现了断路器。当然我们也可以通过Hystrix组件来实现和feign相同的功能，只是操作上要麻烦一些了。
+
+
+
+
 
