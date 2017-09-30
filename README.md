@@ -524,6 +524,7 @@ filterType 用于标注过滤器的拦截时机：
 * post： 路由之后
 
 * error：发送错误调用
+
 * filterOrder：过滤的顺序
 * shouldFilter：这里可以写逻辑判断，是否要过滤，本文true,永远过滤。
 * run：过滤器的具体逻辑。可用很复杂，包括查sql，nosql去判断该请求到底有没有权限访问。
@@ -536,11 +537,9 @@ run 实际的过滤逻辑
 
 本示例中，将所有访问地址匹配"/\w+-\w+/admin"，都直接返回 “must admin can request!'
 
-
-
 # Chapter5:Spring Cloud的分布式配置中心
 
-   分布式配置中心，为微服务的所有服务提供属性配置属性。将配置属性集中管理。配置中心的属性文件可以存放在服务本地也可以存储在git上。配置服务中心同其他服务相同也可以集群化。
+分布式配置中心，为微服务的所有服务提供属性配置属性。将配置属性集中管理。配置中心的属性文件可以存放在服务本地也可以存储在git上。配置服务中心同其他服务相同也可以集群化。
 
 ##### 一、创建一个配置中心服务 config-server
 
@@ -588,6 +587,7 @@ eureka:
 * /{label}/{application}-{profile}.yml
 
 * /{application}-{profile}.properties
+
 * /{label}/{application}-{profile}.properties
 
 ##### 二 、创建config-client项目
@@ -656,4 +656,33 @@ public class GetConfigPropertiesController {
 拷贝application.yml文件内容到application-server1.yml文件和application-server2.yml中，并修改application-server2.yml中的server.port = 8889
 
 2、启动config-server时通过修改环境变量启动两个服务实例。
+
+
+
+# Chapter6:消息总线 Spring Cloud Bus
+
+Spring Cloud的消息总线是基于消息代理实现了，如rabbitMQ。Spring Cloud将分布式的服务都挂载在消息总线上，从而达到相互联系和控制的目的。
+
+下面我们基于Spring Cloud Bus 来实现服务的配置属性实时刷新。
+
+##### 一、基于config-client
+
+1、向config-client 工程中添加如下依赖
+
+```
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-config')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    compile('org.springframework.cloud:spring-cloud-starter-bus-amqp')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+```
+
+2、在需要刷新属性的类上标注@RefreshScope注解
+
+3、调用接口[http://localhost:8889/bus/refresh](http://localhost:8889/bus/refresh)   \(POST方式请求\)，如果请求成功即可实时刷新属性。
+
+4、上面的那种方式会刷新所有服务，可以通过destination参数指定刷新的服务。
+
+如[http://localhost:8889/bus/refresh?destination=customers:9000](http://localhost:8889/bus/refresh?destination=customers:9000),会刷新服务名为customer，端口为9000的实例。
 
