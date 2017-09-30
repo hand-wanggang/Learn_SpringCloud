@@ -383,6 +383,7 @@ public interface RequestServerInfoClient {
 * execution.timeout.enabled 设置是否开启超时时间设置，默认为true
 
 * execution.isolation.thread.interruptOnTimeout 设置当hystrix执行超时时，是否将请求中断。默认为true
+
 * execution.isolation.semaphore.maxConcurrentRequests 当设置隔离策略为信号量时，设置的并发信号量最大数量，当并发量大于该数值，请求将会被直接拒绝。
 
 ###### 2、前缀为fallback的配置
@@ -521,6 +522,7 @@ filterType 用于标注过滤器的拦截时机：
 * routing：路由之时
 
 * post： 路由之后
+
 * error：发送错误调用
 * filterOrder：过滤的顺序
 * shouldFilter：这里可以写逻辑判断，是否要过滤，本文true,永远过滤。
@@ -533,4 +535,125 @@ shouldFilter 用于设置是否需要执行过滤方法run\(\),如果为false则
 run 实际的过滤逻辑
 
 本示例中，将所有访问地址匹配"/\w+-\w+/admin"，都直接返回 “must admin can request!'
+
+
+
+# Chapter5:Spring Cloud的分布式配置中心
+
+   分布式配置中心，为微服务的所有服务提供属性配置属性。将配置属性集中管理。配置中心的属性文件可以存放在服务本地也可以存储在git上。配置服务中心同其他服务相同也可以集群化。
+
+##### 一、创建一个配置中心服务 config-server
+
+1、创建工程config-server,并添加如下依赖
+
+```
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-config-server')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+```
+
+2、添加配置文件application.yml如下
+
+```
+server:
+  port: 8888
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/hand-wanggang/CloudConfig # git 仓库地址
+          #password:  #git 仓库密码
+          #username:  #git 密码
+          search-paths: '{profile}' # 查找路径
+        bootstrap: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+```
+
+3、在程序入口类上添加注解@EnableConfigServer和@EnableEurekaClients
+
+注意：http请求地址和映射资源关系如下
+
+* /{application}/{profile}\[/{label}\]
+
+* /{application}-{profile}.yml
+
+* /{label}/{application}-{profile}.yml
+
+* /{application}-{profile}.properties
+* /{label}/{application}-{profile}.properties
+
+##### 二 、创建config-client项目
+
+1、创建项目config-client,并添加如下依赖
+
+```
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-config')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+```
+
+2、因为使用的是配置中心进行配置，所以属性文件名称修改为bootstrap.yml
+
+```
+server:
+  port: 8889
+spring:
+  application:
+    name: config-client
+  cloud:
+    config:
+      label: master  # 指明远程仓库分支
+      profile: dev   # 指明spring.profile
+      discovery:
+        enabled: true
+        service-id: config-server # 配置服务中心的注册服务名称
+      name: config-client
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+```
+
+3、在入口程序的类上添加注解@EnableEurekaClient
+
+4、编写代码将从配置中心获取到的属性，打印出来
+
+```
+@RestController
+@RequestMapping("/")
+public class GetConfigPropertiesController {
+
+    @Value("${foo.version}")
+    private String version;
+
+    @RequestMapping("/version")
+    public String version(){
+        return version;
+    }
+}
+```
+
+5、访问地址[http://laptop-hqmj7ho2:8889/version](http://laptop-hqmj7ho2:8889/version)
+
+![](/assets/import-config-client-1.png)
+
+##### 三、配置服务中心的高可用
+
+同之前服务相同，spring clod的中的服务似乎都是可以高可用的。下面我们来配置一个高可用的服务中心。因为上面的config-client的例子中，我们没有明确指定配置中心的地址，而是使用配置服务中心的注册名，这为下面的例子做了铺垫。现在我们只需要对confg-server稍作修改即可。
+
+1、以为配置高可用，至少需要config-server的两个实例，所以需要修改config-server的配置文件。
+
+拷贝application.yml文件内容到application-server1.yml文件和application-server2.yml中，并修改application-server2.yml中的server.port = 8889
+
+2、启动config-server时通过修改环境变量启动两个服务实例。
 

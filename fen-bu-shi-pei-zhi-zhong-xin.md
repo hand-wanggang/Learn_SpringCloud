@@ -1,8 +1,6 @@
 # Spring Cloud的分布式配置中心
 
-```
    分布式配置中心，为微服务的所有服务提供属性配置属性。将配置属性集中管理。配置中心的属性文件可以存放在服务本地也可以存储在git上。配置服务中心同其他服务相同也可以集群化。
-```
 
 ##### 一、创建一个配置中心服务 config-server
 
@@ -48,6 +46,7 @@ eureka:
 * /{application}-{profile}.yml
 
 * /{label}/{application}-{profile}.yml
+
 * /{application}-{profile}.properties
 * /{label}/{application}-{profile}.properties
 
