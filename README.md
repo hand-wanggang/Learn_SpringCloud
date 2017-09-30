@@ -320,8 +320,6 @@ public interface RequestServerInfoClient {
 
 6、比较三和四中，两种调用服务的方法：相比之下feign更加易用，对错误的处理也更加便捷并且feign默认实现了断路器。当然我们也可以通过Hystrix组件来实现和feign相同的功能，只是操作上要麻烦一些了。
 
-
-
 # Chapter3:Hystrix断路器
 
 在微服务的架构中，服务与服务之间可以互相调用。如果在服务间调用时，如果单个服务出现故障就会出现线程阻塞的情况，如果此时大量的请求涌入，会导致web容器的线程资源耗尽，服务不可用的情况。并且这种故障在服务间是会传播的。
@@ -383,6 +381,7 @@ public interface RequestServerInfoClient {
 * execution.isolation.thread.timeoutInMilliseconds 设置执行的超时时间，若执行超过该时间，将会对该服务进行降级处理。
 
 * execution.timeout.enabled 设置是否开启超时时间设置，默认为true
+
 * execution.isolation.thread.interruptOnTimeout 设置当hystrix执行超时时，是否将请求中断。默认为true
 * execution.isolation.semaphore.maxConcurrentRequests 当设置隔离策略为信号量时，设置的并发信号量最大数量，当并发量大于该数值，请求将会被直接拒绝。
 
@@ -409,4 +408,129 @@ maxQueueSize:线程池的最大队列大小，当设置为-1时，线程池将�
 具体的参数设置参考：[http://www.cnblogs.com/li3807/p/7501427.html](http://www.cnblogs.com/li3807/p/7501427.html)
 
 [https://github.com/Netflix/Hystrix/tree/master/hystrix-contrib/hystrix-javanica\#configuration](https://github.com/Netflix/Hystrix/tree/master/hystrix-contrib/hystrix-javanica#configuration)
+
+# Chapter4:Spring Cloud的路由网关Zuul
+
+Demo:[https://github.com/hand-wanggang/erueka-demo/tree/zuul-demo/service-zuul](https://github.com/hand-wanggang/erueka-demo/tree/zuul-demo/service-zuul)
+
+zuul的功能主要是起到路由转发的作用。在zuul我们可以通过地址匹配的方式将,访问特定地址的请求转发的特定的服务，这种转发不是明确的指向一个服务实例，他是支持负载均衡的。同样我们也可以通过zuul来对用户进行权限校验等。
+
+##### 一、创建工程实例
+
+1、创建模块service-zuul并像器build.gradle文件中添加如下依赖：
+
+```
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-zuul')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+```
+
+2、在模块程序入口的主类上添加@EnableZuulProxy 和@EnableEurekaClient，开启zuul功能和注册到eureka-server
+
+3、添加配置文件application.yml文件如下
+
+```
+server:
+  port: 8092
+spring:
+  application:
+    name: zuul
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+zuul:
+  routes:
+    ser-pro:
+      path: /server-pro/**          # 如果匹配地址成功则转发到 service-provide 服务
+      serviceId: service-provide
+    ser-cus:
+      path: /server-cus/**          # 如果匹配地址成功则转发到 server-cus 服务
+      serviceId: service-customer
+```
+
+该配置文件的主要作用：
+
+* 将所有请求地址为[http://localhost:8092/server-cus/\*的请求转发到服务名为service-customer的实例上](http://localhost:8092/server-cus/*的请求转发到服务名为service-customer的实例上)
+* 将所有请求地址为[http://localhost:8092/server-pro/\*的请求都转发到名为service-provide的实例上](http://localhost:8092/server-pro/*的请求都转发到名为service-provide的实例上)
+
+4、测试结果
+
+请求地址[http://localhost:8092/server-pro/info](http://localhost:8092/server-pro/info)
+
+![](/assets/import-zuul-2.png)
+
+请求地址[http://localhost:8092/server-cus/request](http://localhost:8092/server-cus/request)
+
+![](/assets/import-zuul-1.png)
+
+##### 二、测试zuul的测试功能
+
+1、在原来代码的基础上添加MyFilter继承自ZuulFilter
+
+```
+@Component
+public class MyFilter extends ZuulFilter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MyFilter.class);
+
+    @Override
+    public String filterType() {
+        return "pre";
+    }
+
+    @Override
+    public int filterOrder() {
+        return 0;
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Object run() {
+        RequestContext ctx = RequestContext.getCurrentContext();
+        HttpServletRequest request = ctx.getRequest();
+        HttpServletResponse response = ctx.getResponse();
+        String requestUrl =  request.getRequestURI();
+        String reg ="/\\w+-\\w+/admin";
+        if(requestUrl.matches(reg)){
+            try {
+                PrintWriter writer = response.getWriter();
+                writer.print("must admin can request!");
+                writer.flush();
+                writer.close();
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        return null;
+    }
+}
+```
+
+filterType 用于标注过滤器的拦截时机：
+
+* pre：路由之前
+
+* routing：路由之时
+
+* post： 路由之后
+* error：发送错误调用
+* filterOrder：过滤的顺序
+* shouldFilter：这里可以写逻辑判断，是否要过滤，本文true,永远过滤。
+* run：过滤器的具体逻辑。可用很复杂，包括查sql，nosql去判断该请求到底有没有权限访问。
+
+filterOrder 用于设置该过滤器在过滤器链中的执行顺序
+
+shouldFilter 用于设置是否需要执行过滤方法run\(\),如果为false则不会执行run（）方法。
+
+run 实际的过滤逻辑
+
+本示例中，将所有访问地址匹配"/\w+-\w+/admin"，都直接返回 “must admin can request!'
 
